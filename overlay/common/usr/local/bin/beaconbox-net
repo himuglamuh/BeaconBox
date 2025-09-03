@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Bring up AP iface with static IP
+WIFACE="$(iw dev 2>/dev/null | awk '/Interface/ {print $2; exit}')"
+: "${WIFACE:=wlan0}"
+
+ip link set "$WIFACE" down || true
+ip addr flush dev "$WIFACE" || true
+ip addr add 10.42.0.1/24 dev "$WIFACE"
+ip link set "$WIFACE" up
+
+# Prepare content dir with tight perms
+install -d -o www-data -g www-data /srv/beaconbox
+find /srv/beaconbox -type d -exec chmod 0755 {} \; 2>/dev/null || true
+find /srv/beaconbox -type f -exec chmod 0644 {} \; 2>/dev/null || true
+
+# Apply config + start services
+/usr/local/bin/beaconbox-apply-config
+systemctl restart hostapd || systemctl start hostapd
+systemctl restart dnsmasq || systemctl start dnsmasq

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CFG=/etc/beaconbox/config.yaml
+get_yaml() { awk -F': *' -v k="$1" '$1==k{print $2}' "$CFG" | tr -d '"'; }
+
+ssid=$(get_yaml ssid)
+pass=$(get_yaml passphrase)
+country=$(get_yaml country)
+hidden=$(get_yaml hidden)
+captive=$(get_yaml captive)
+
+# Resolve %RAND% once and persist
+if [[ "$ssid" == *"%RAND%"* ]]; then
+  RAND=$(tr -dc A-Z0-9 </dev/urandom | head -c4)
+  ssid="${ssid/\%RAND\%/$RAND}"
+  sed -i "s|^ssid:.*|ssid: \"$ssid\"|" "$CFG"
+fi
+
+hidden_flag=0; [[ "$hidden" == "true" ]] && hidden_flag=1
+
+# Detect Wi-Fi iface (fallback wlan0)
+WIFACE="$(iw dev 2>/dev/null | awk '/Interface/ {print $2; exit}')"
+: "${WIFACE:=wlan0}"
+
+# hostapd
+install -d /etc/hostapd /etc/dnsmasq.d
+cat >/etc/hostapd/hostapd.conf <<EOF
+interface=$WIFACE
+ssid=$ssid
+ignore_broadcast_ssid=$hidden_flag
+country_code=$country
+hw_mode=g
+channel=6
+wmm_enabled=1
+wpa=2
+wpa_passphrase=$pass
+wpa_key_mgmt=WPA-PSK
+rsn_pairwise=CCMP
+EOF
+
+# dnsmasq
+cat >/etc/dnsmasq.d/beaconbox.conf <<EOF
+interface=$WIFACE
+dhcp-range=10.42.0.50,10.42.0.200,12h
+EOF
+[[ "$captive" == "true" ]] && echo "address=/#/10.42.0.1" >> /etc/dnsmasq.d/beaconbox.conf

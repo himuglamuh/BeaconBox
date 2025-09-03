@@ -1,0 +1,19 @@
+:80 {
+  # Captive probes → portal
+  @android path /generate_204 /gen_204
+  handle @android { redir / 302 }
+
+  @apple host captive.apple.com www.apple.com
+  handle @apple { handle_path /hotspot-detect.html { redir / 302 } }
+
+  @msft host msftconnecttest.com www.msftconnecttest.com msftncsi.com www.msftncsi.com
+  handle @msft { redir / 302 }
+
+  # Global redirect for any other host/path
+  handle { redir / 302 }
+
+  # Serve ONLY from /srv/beaconbox
+  root * /srv/beaconbox
+  try_files {path} /index.html
+  file_server browse
+}

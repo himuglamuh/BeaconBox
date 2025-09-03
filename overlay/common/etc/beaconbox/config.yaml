@@ -1,0 +1,7 @@
+mode: broadcast
+ssid: "BeaconBox-%RAND%"
+hidden: false
+passphrase: "library-access"
+country: US
+captive: true
+gateway: false

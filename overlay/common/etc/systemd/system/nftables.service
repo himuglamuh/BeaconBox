@@ -1,0 +1,11 @@
+[Unit]
+Description=Load nftables rules
+Before=beaconbox-net.service
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/nft -f /etc/nftables.conf
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+[Unit]
+Description=BeaconBox AP (hostapd + dnsmasq)
+After=multi-user.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/beaconbox-net
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
