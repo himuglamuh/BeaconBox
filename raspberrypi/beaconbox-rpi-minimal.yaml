@@ -62,7 +62,6 @@ actions:
     imagename: "debian-rpi4.img"
     imagesize: 2GB
     partitiontype: gpt
-    diskid: "9E9B7F17-3D48-49B6-A70B-F26D76D17A44"
     mountpoints:
       - mountpoint: /
         partition: root
@@ -70,16 +69,16 @@ actions:
         partition: boot
     partitions:
       - name: boot
-        partlabel: boot
+        partlabel: BOOT
         fs: vfat
         fslabel: BOOT
         start: 0%
         end: 256MB
         flags: [ boot ]
       - name: root
-        partlabel: rootfs
+        partlabel: ROOTFS
         fs: ext4
-        fslabel: ROOT
+        fslabel: ROOTFS
         start: 256MB
         end: 100%
 
