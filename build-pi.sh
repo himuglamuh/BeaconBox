@@ -17,7 +17,7 @@ docker run --rm -it --privileged \
   -v /dev:/dev \
   -v $(pwd)/:/workspace \
   debos-rpi \
-  bash -c "mkdir -p /tmp/build && cp -r /workspace/* /tmp/build/ && cd /tmp/build/raspberrypi && debos --debug --disable-fakemachine beaconbox-rpi-minimal.yaml && cp /tmp/build/raspberrypi/beaconbox-pi.img /workspace/"
+  bash -c "mkdir -p /tmp/build && cp -r /workspace/* /tmp/build/ && cd /tmp/build/raspberrypi && debos --disable-fakemachine beaconbox-rpi-minimal.yaml && cp /tmp/build/raspberrypi/beaconbox-pi.img /workspace/"
 echo "BeaconBox OS image build complete"
 
 echo "Cleaning up docker image"

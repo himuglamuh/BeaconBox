@@ -15,6 +15,30 @@ actions:
     chroot: false
     command: mkdir -p /run/systemd/nspawn/propagate
 
+  - action: image-partition
+    imagename: "debian-rpi4.img"
+    imagesize: 2GB
+    partitiontype: gpt
+    mountpoints:
+      - mountpoint: /
+        partition: root
+      - mountpoint: /boot/firmware
+        partition: boot
+    partitions:
+      - name: boot
+        partlabel: BOOT
+        fs: vfat
+        fslabel: BOOT
+        start: 0%
+        end: 256MB
+        flags: [ boot ]
+      - name: root
+        partlabel: ROOTFS
+        fs: ext4
+        fslabel: ROOTFS
+        start: 256MB
+        end: 100%
+
   - action: debootstrap
     suite: bookworm
     components:
@@ -57,30 +81,6 @@ actions:
       - systemd
       - caddy
       - nftables
-
-  - action: image-partition
-    imagename: "debian-rpi4.img"
-    imagesize: 2GB
-    partitiontype: gpt
-    mountpoints:
-      - mountpoint: /
-        partition: root
-      - mountpoint: /boot/firmware
-        partition: boot
-    partitions:
-      - name: boot
-        partlabel: BOOT
-        fs: vfat
-        fslabel: BOOT
-        start: 0%
-        end: 256MB
-        flags: [ boot ]
-      - name: root
-        partlabel: ROOTFS
-        fs: ext4
-        fslabel: ROOTFS
-        start: 256MB
-        end: 100%
 
   - action: overlay
     source: ../overlay/common
