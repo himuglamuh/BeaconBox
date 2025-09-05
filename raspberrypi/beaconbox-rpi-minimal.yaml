@@ -6,6 +6,11 @@ environment:
 
 actions:
   - action: run
+    description: Clean up any previous run
+    chroot: false
+    command: rm -rf ${ROOTDIR} ${tmpdir} && rm -f beaconbox-pi.img
+
+  - action: run
     description: Workaround for systemd-namespace cleanup failure
     chroot: false
     command: mkdir -p /run/systemd/nspawn/propagate
@@ -54,20 +59,28 @@ actions:
       - nftables
 
   - action: image-partition
-    imagename: beaconbox-pi.img
+    imagename: "debian-rpi4.img"
     imagesize: 2GB
-    partitiontable: msdos
+    partitiontype: gpt
+    diskid: "9E9B7F17-3D48-49B6-A70B-F26D76D17A44"
+    mountpoints:
+      - mountpoint: /
+        partition: root
+      - mountpoint: /boot/firmware
+        partition: boot
     partitions:
       - name: boot
+        partlabel: boot
         fs: vfat
         fslabel: BOOT
-        start: 8192s
-        end: 264191s
-        mountpoint: /boot/firmware
+        start: 0%
+        end: 256MB
+        flags: [ boot ]
       - name: root
+        partlabel: rootfs
         fs: ext4
-        fslabel: rootfs
-        start: 264192s
+        fslabel: ROOT
+        start: 256MB
         end: 100%
 
   - action: overlay
