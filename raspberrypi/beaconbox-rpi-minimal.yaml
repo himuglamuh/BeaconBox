@@ -1,0 +1,93 @@
+architecture: arm64
+
+environment:
+  - tmpdir=/tmp/debos_tmp
+  - DEBOS_DEBUG=1
+
+actions:
+  - action: run
+    description: Workaround for systemd-namespace cleanup failure
+    chroot: false
+    command: mkdir -p /run/systemd/nspawn/propagate
+
+  - action: debootstrap
+    suite: bookworm
+    components:
+      - main
+      - contrib
+      - non-free
+      - non-free-firmware
+    mirror: http://deb.debian.org/debian
+
+  - action: run
+    description: Fix resolv.conf for networking inside chroot
+    chroot: false
+    command: >
+      mkdir -p ${ROOTDIR}/etc &&
+      cp /etc/resolv.conf ${ROOTDIR}/etc/resolv.conf
+
+  - action: run
+    description: Install setup dependencies
+    chroot: true
+    command: >
+      apt-get update &&
+      apt-get install -y --no-install-recommends curl gpg ca-certificates zstd
+
+  - action: run
+    description: Add Raspberry Pi APT repo using signed-by keyring
+    chroot: true
+    script: |
+      apt-get update
+      curl -fsSL https://archive.raspberrypi.org/debian/raspberrypi.gpg.key | gpg --dearmor -o /usr/share/keyrings/raspi-archive-keyring.gpg
+      echo "deb [signed-by=/usr/share/keyrings/raspi-archive-keyring.gpg] http://archive.raspberrypi.org/debian bookworm main" > /etc/apt/sources.list.d/raspi.list
+      apt-get update
+
+  - action: apt
+    description: Install required packages
+    packages:
+      - linux-image-arm64
+      - raspberrypi-bootloader
+      - raspberrypi-kernel
+      - firmware-brcm80211
+      - systemd
+      - caddy
+      - nftables
+
+  - action: image-partition
+    imagename: beaconbox-pi.img
+    imagesize: 2GB
+    partitiontable: msdos
+    partitions:
+      - name: boot
+        fs: vfat
+        fslabel: BOOT
+        start: 8192s
+        end: 264191s
+        mountpoint: /boot/firmware
+      - name: root
+        fs: ext4
+        fslabel: rootfs
+        start: 264192s
+        end: 100%
+
+  - action: overlay
+    source: ../overlay/common
+    destination: /
+    preserve: true
+
+  - action: overlay
+    source: ../overlay/pi/boot
+    destination: /boot/firmware
+    preserve: true
+
+  - action: overlay
+    source: ../overlay/pi/boot
+    destination: /boot
+    preserve: true
+
+  - action: run
+    chroot: true
+    script: |
+      systemctl enable beaconbox-net.service
+      systemctl enable beaconbox-web.service
+      systemctl enable nftables.service
