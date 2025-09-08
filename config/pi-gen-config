@@ -8,4 +8,4 @@ FIRST_USER_NAME=beaconbox
 FIRST_USER_PASS=beaconbox
 DISABLE_FIRST_BOOT_USER_RENAME=1
 ENABLE_SSH=1
-STAGE_LIST="stage0 stage1 stage2 stage-beaconbox"
+STAGE_LIST="stage0 stage1 stage-beaconbox"
