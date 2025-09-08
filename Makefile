@@ -3,7 +3,7 @@
 all: build
 
 build:
-	# git submodule update --init --recursive
+	git submodule update --init --remote
 	cp config/pi-gen-config pi-gen/config
 	cp -r overlay/common pi-gen/common-overlay
 	cd pi-gen && sudo ./build-docker.sh
