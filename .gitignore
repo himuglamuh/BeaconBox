@@ -1,2 +1,4 @@
 build.log
 *.img
+*.zip
+pi-gen/deploy

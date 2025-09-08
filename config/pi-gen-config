@@ -1,0 +1,12 @@
+WORK_DIR=./work
+DEPLOY_DIR=./deploy
+MIRROR=http://deb.debian.org/debian
+IMG_NAME=beaconbox-os
+TARGET_HOSTNAME=beaconbox
+KEYBOARD_KEYMAP=us
+KEYBOARD_LAYOUT="English (US)"
+FIRST_USER_NAME=beaconbox
+FIRST_USER_PASS=beaconbox
+DISABLE_FIRST_BOOT_USER_RENAME=1
+ENABLE_SSH=1
+STAGE_LIST="stage0 stage1 stage2"
