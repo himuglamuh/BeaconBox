@@ -1,4 +1,6 @@
 DEPLOY_COMPRESSION=none
+RELEASE=trixie
+DEBUG=1
 MIRROR=http://deb.debian.org/debian
 IMG_NAME=beaconbox-os
 TARGET_HOSTNAME=beaconbox

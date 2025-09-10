@@ -1,6 +1,7 @@
 [Unit]
-Description=BeaconBox AP (hostapd + dnsmasq)
-After=multi-user.target
+Description=BeaconBox Network Setup
+After=network-pre.target
+Before=network.target
 Wants=network.target
 
 [Service]
