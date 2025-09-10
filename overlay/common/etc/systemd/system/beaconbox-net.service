@@ -1,8 +1,10 @@
 [Unit]
 Description=BeaconBox Network Setup
-After=network-pre.target
-Before=network.target
+After=network-pre.target sys-subsystem-net-devices-wlan0.device
+Requires=sys-subsystem-net-devices-wlan0.device
 Wants=network.target
+DefaultDependencies=no
+Before=network.target
 
 [Service]
 Type=oneshot

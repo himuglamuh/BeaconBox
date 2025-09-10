@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+rfkill unblock wifi
+
 # Bring up AP iface with static IP
 WIFACE="$(iw dev 2>/dev/null | awk '/Interface/ {print $2; exit}')"
 : "${WIFACE:=wlan0}"
