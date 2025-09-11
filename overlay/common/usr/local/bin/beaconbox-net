@@ -1,23 +1,32 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo "[BeaconBox] Starting network setup"
+
+echo "[BeaconBox] Unblocking Wi-Fi (rfkill)"
 rfkill unblock wifi
 
-# Bring up AP iface with static IP
+echo "[BeaconBox] Detecting Wi-Fi iface"
 WIFACE="$(iw dev 2>/dev/null | awk '/Interface/ {print $2; exit}')"
 : "${WIFACE:=wlan0}"
+echo "[BeaconBox] Wi-Fi iface: $WIFACE"
 
+echo "[BeaconBox] Setting up $WIFACE with static IP"
 ip link set "$WIFACE" down || true
 ip addr flush dev "$WIFACE" || true
 ip addr add 10.42.0.1/24 dev "$WIFACE"
 ip link set "$WIFACE" up
 
-# Prepare content dir with tight perms
+echo "[BeaconBox] Prepare content dir with tight perms"
 install -d -o www-data -g www-data /srv/beaconbox
 find /srv/beaconbox -type d -exec chmod 0755 {} \; 2>/dev/null || true
 find /srv/beaconbox -type f -exec chmod 0644 {} \; 2>/dev/null || true
 
-# Apply config + start services
+echo "[BeaconBox] Calling apply-config"
 /usr/local/bin/beaconbox-apply-config
+
+echo "[BeaconBox] Restarting hostapd and dnsmasq"
 systemctl restart hostapd || systemctl start hostapd
 systemctl restart dnsmasq || systemctl start dnsmasq
+
+echo "[BeaconBox] Network setup complete"
