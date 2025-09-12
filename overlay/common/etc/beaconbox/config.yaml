@@ -1,5 +1,5 @@
 mode: broadcast
-ssid: "BeaconBox-%RAND%"
+ssid: "BeaconBox"
 hidden: false
 passphrase: "beaconbox"
 country: US

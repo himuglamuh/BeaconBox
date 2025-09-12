@@ -15,7 +15,7 @@ captive=$(get_yaml captive)
 
 # Safe default fallback
 : "${ssid:=BeaconBox}"
-: "${pass:=beaconbox123}"
+: "${pass:=beaconbox}"
 : "${country:=US}"
 : "${hidden:='false'}"
 : "${captive:='false'}"

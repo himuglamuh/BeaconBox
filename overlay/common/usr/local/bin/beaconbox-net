@@ -25,8 +25,7 @@ find /srv/beaconbox -type f -exec chmod 0644 {} \; 2>/dev/null || true
 echo "[BeaconBox] Calling apply-config"
 /usr/local/bin/beaconbox-apply-config
 
-echo "[BeaconBox] Restarting hostapd and dnsmasq"
+echo "[BeaconBox] Restarting hostapd"
 systemctl restart hostapd || systemctl start hostapd
-systemctl restart dnsmasq || systemctl start dnsmasq
 
 echo "[BeaconBox] Network setup complete"

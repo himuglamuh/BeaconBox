@@ -1,19 +1,18 @@
 :80 {
-  # Captive probes → portal
-  @android path /generate_204 /gen_204
-  handle @android { redir / 302 }
+  # 🍏 Apple triggers captive portal if it can't reach this
+  @appleProbe host captive.apple.com www.apple.com
+  rewrite @appleProbe /index.html
 
-  @apple host captive.apple.com www.apple.com
-  handle @apple { handle_path /hotspot-detect.html { redir / 302 } }
+  # 🤖 Android triggers on missing /generate_204
+  @androidProbe path /generate_204 /gen_204
+  rewrite @androidProbe /index.html
 
-  @msft host msftconnecttest.com www.msftconnecttest.com msftncsi.com www.msftncsi.com
-  handle @msft { redir / 302 }
+  # 🪟 Windows uses this to detect success
+  @msftProbe host msftconnecttest.com www.msftconnecttest.com msftncsi.com www.msftncsi.com
+  rewrite @msftProbe /index.html
 
-  # Global redirect for any other host/path
-  handle { redir / 302 }
-
-  # Serve ONLY from /srv/beaconbox
+  # ✋ Serve everything else normally
   root * /srv/beaconbox
-  try_files {path} /index.html
+  try_files {path} {path}/ /index.html
   file_server browse
 }
