@@ -6,6 +6,8 @@ build:
 	git submodule update --init --remote
 	cp config/pi-gen-config pi-gen/config
 	cp -r overlay/common pi-gen/common-overlay
+	cp ./config.yaml overlay/common/etc/beaconbox/config.yaml
+	./config/update-config.sh
 	cd pi-gen && sudo ./build-docker.sh
 
 clean:

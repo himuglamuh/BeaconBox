@@ -5,26 +5,42 @@ echo "[BeaconBox] apply-config called"
 echo "[BeaconBox] Reading config from /etc/beaconbox/config.yaml"
 
 CFG=/etc/beaconbox/config.yaml
-get_yaml() { awk -F': *' -v k="$1" '$1==k{print $2}' "$CFG" | tr -d '"'; }
+
+get_yaml() {
+  local key="$1"
+  awk -v k="$key" '
+    $1 == k ":" {
+      val = $2
+      for (i = 3; i <= NF; i++) val = val " " $i
+      # Remove quotes, trailing comments
+      sub(/#.*/, "", val)
+      gsub(/^ *"/, "", val)
+      gsub(/" *$/, "", val)
+      gsub(/^ *'\''/, "", val)
+      gsub(/'\'' *$/, "", val)
+      gsub(/^ +| +$/, "", val)
+      print val
+    }
+  ' "$CFG"
+}
 
 ssid=$(get_yaml ssid)
 pass=$(get_yaml passphrase)
 country=$(get_yaml country)
 hidden=$(get_yaml hidden)
-captive=$(get_yaml captive)
+wifisecurity=$(get_yaml wifi_security)
 
 # Safe default fallback
 : "${ssid:=BeaconBox}"
 : "${pass:=beaconbox}"
 : "${country:=US}"
 : "${hidden:='false'}"
-: "${captive:='false'}"
 
 echo "[BeaconBox] SSID: ${ssid}"
 echo "[BeaconBox] Passphrase: ${pass}"
 echo "[BeaconBox] Country: ${country}"
 echo "[BeaconBox] Hidden: ${hidden}"
-echo "[BeaconBox] Captive Portal: ${captive}"
+echo "[BeaconBox] Wi-Fi Security: ${wifisecurity}"
 
 echo "[BeaconBox] Calculating hidden flag"
 
@@ -53,9 +69,11 @@ done
 
 echo "[BeaconBox] Applying hostapd config"
 
-# hostapd
 install -d /etc/hostapd /etc/dnsmasq.d
-cat >/etc/hostapd/hostapd.conf <<EOF
+
+HOSTAPD_CONF="/etc/hostapd/hostapd.conf"
+
+cat > "$HOSTAPD_CONF" <<EOF
 interface=$WIFACE
 ssid=$ssid
 macaddr_acl=0
@@ -65,11 +83,25 @@ country_code=$country
 hw_mode=g
 channel=6
 wmm_enabled=1
+EOF
+
+if [[ "$wifisecurity" == "wpa2" ]]; then
+  if [[ -z "$pass" || "$pass" == "null" ]]; then
+    echo "[ERROR] WPA2 selected but no passphrase provided. Defaulting to 'beaconbox'."
+    pass="beaconbox"
+  fi
+  cat >> "$HOSTAPD_CONF" <<EOF
 wpa=2
 wpa_passphrase=$pass
 wpa_key_mgmt=WPA-PSK
 rsn_pairwise=CCMP
 EOF
+elif [[ "$wifisecurity" == "none" ]]; then
+  echo "[BeaconBox] Open Wi-Fi: no passphrase"
+else
+  echo "[ERROR] Unknown wifi_security: $wifisecurity"
+  exit 1
+fi
 
 echo "[BeaconBox] Applying dnsmasq config"
 
@@ -78,7 +110,7 @@ cat >/etc/dnsmasq.d/beaconbox.conf <<EOF
 interface=$WIFACE
 bind-interfaces
 dhcp-range=10.42.0.50,10.42.0.200,12h
+address=/#/10.42.0.1
 EOF
-[[ "$captive" == "true" ]] && echo "address=/#/10.42.0.1" >> /etc/dnsmasq.d/beaconbox.conf
 
 echo "[BeaconBox] apply-config completed"
