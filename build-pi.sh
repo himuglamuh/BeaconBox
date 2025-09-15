@@ -23,9 +23,9 @@ cp ./config.yaml overlay/common/etc/beaconbox/config.yaml
 echo "📂 Distributing common overlay files"
 cp -r overlay/common pi-gen/common-overlay
 
-echo "⏳ Running pi-gen build (This may take a long time with limited/no output during this phase. Be patient)"
+echo "⏳ Running pi-gen build (This may take a long time with limited/no output during this phase. Be patient. 🙂)"
 cd pi-gen
-./pi-gen/build-docker.sh > /dev/null 2>&1
+./build-docker.sh > /dev/null 2>&1
 cd ..
 
 echo "🫱 Grabbing completed image"
@@ -33,6 +33,8 @@ sudo mv pi-gen/deploy/*.img .
 echo "⌛ Build complete. Image:"
 ls -lh *.img
 
-echo "🪵 Build logs: $PI_GEN_DIR/deploy/build.log"
+echo "🪵 Build logs: "
+echo " - $PI_GEN_DIR/deploy/build.log"
+echo " - $PI_GEN_DIR/deploy/build-docker.log"
 
 echo "✅ Raspberry Pi build complete"
