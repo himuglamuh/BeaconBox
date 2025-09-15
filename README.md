@@ -106,3 +106,35 @@ BeaconBox/
 - Support for x86_64 builds
 - Automatically serve files on connected USB drives 
 
+## 🧨 Known Issues
+
+### ❗ Kernel panic on iOS hotspot interactions (`cfg80211: Failed to start P2P device`)
+
+**Symptoms:**
+- BeaconBox appears to work fine until an iOS user taps the `ℹ️` info icon next to the network and attempts to **"Forget This Network"**
+- This triggers a **kernel panic** and hard crash on the Pi
+- Serial logs show (or similar):
+```
+cfg80211: Failed to start P2P device
+Internal error: Oops: 96000004 \[#1] SMP
+
+```
+
+**Cause:**  
+This is a **known Raspberry Pi kernel bug** involving the **cfg80211 subsystem** and **Wi-Fi P2P (Peer-to-Peer)** operations. iOS devices may attempt to initiate a P2P query when interacting with hotspot settings, triggering an unrecoverable kernel fault.
+
+**Mitigation (what BeaconBox does):**
+- We **do not disable P2P**, because that doesn’t fully prevent the issue in all cases
+  - The bugged firmware ignores instructions to disable P2P
+- Instead, BeaconBox is configured to:
+  - **Automatically detect kernel panic crashes**
+  - **Reboot as quickly as possible** to restore service with minimal downtime
+
+**Why this works:**
+- The crash only happens in rare user flows (e.g., forgetting the network on iOS - most users will just connect back to whatever network they were on previously)
+- Recovery is nearly instant due to **aggressive boot time optimization** (sub-5s cold boot)
+
+**Status:**  
+🩹 **Crash detection and auto-reboot is implemented**  
+⚠️ A future kernel fix may render this workaround obsolete
+
