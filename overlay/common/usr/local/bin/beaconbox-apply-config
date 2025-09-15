@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "[BeaconBox] apply-config called"
+echo "[BeaconBox] Reading config from /etc/beaconbox/config.yaml"
+
+CFG=/etc/beaconbox/config.yaml
+
+get_yaml() {
+  local key="$1"
+  awk -v k="$key" '
+    $1 == k ":" {
+      val = $2
+      for (i = 3; i <= NF; i++) val = val " " $i
+      # Remove quotes, trailing comments
+      sub(/#.*/, "", val)
+      gsub(/^ *"/, "", val)
+      gsub(/" *$/, "", val)
+      gsub(/^ *'\''/, "", val)
+      gsub(/'\'' *$/, "", val)
+      gsub(/^ +| +$/, "", val)
+      print val
+    }
+  ' "$CFG"
+}
+
+ssid=$(get_yaml ssid)
+pass=$(get_yaml passphrase)
+country=$(get_yaml country)
+hidden=$(get_yaml hidden)
+wifisecurity=$(get_yaml wifi_security)
+
+# Safe default fallback
+: "${ssid:=BeaconBox}"
+: "${pass:=beaconbox}"
+: "${country:=US}"
+: "${hidden:='false'}"
+
+echo "[BeaconBox] SSID: ${ssid}"
+echo "[BeaconBox] Passphrase: ${pass}"
+echo "[BeaconBox] Country: ${country}"
+echo "[BeaconBox] Hidden: ${hidden}"
+echo "[BeaconBox] Wi-Fi Security: ${wifisecurity}"
+
+echo "[BeaconBox] Calculating hidden flag"
+
+hidden_flag=0; [[ "$hidden" == "true" ]] && hidden_flag=1
+
+echo "[BeaconBox] Hidden flag: ${hidden_flag}"
+
+echo "[BeaconBox] Determining Wi-Fi iface"
+
+# Detect Wi-Fi iface (fallback wlan0)
+WIFACE="$(iw dev 2>/dev/null | awk '/Interface/ {print $2; exit}')"
+: "${WIFACE:=wlan0}"
+
+echo "[BeaconBox] Wi-Fi iface: ${WIFACE}"
+
+# Wait for interface to actually appear (e.g., after firmware loads)
+echo "[BeaconBox] Waiting for $WIFACE to be usable..."
+for i in {1..5}; do
+    if ip link show "$WIFACE" &>/dev/null; then
+        echo "[BeaconBox] $WIFACE is ready."
+        break
+    fi
+    echo "[BeaconBox] Still waiting..."
+    sleep 1
+done
+
+echo "[BeaconBox] Applying hostapd config"
+
+install -d /etc/hostapd /etc/dnsmasq.d
+
+HOSTAPD_CONF="/etc/hostapd/hostapd.conf"
+
+cat > "$HOSTAPD_CONF" <<EOF
+interface=$WIFACE
+ssid=$ssid
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=$hidden_flag
+country_code=$country
+hw_mode=g
+channel=6
+wmm_enabled=1
+EOF
+
+if [[ "$wifisecurity" == "wpa2" ]]; then
+  if [[ -z "$pass" || "$pass" == "null" ]]; then
+    echo "[ERROR] WPA2 selected but no passphrase provided. Defaulting to 'beaconbox'."
+    pass="beaconbox"
+  fi
+  cat >> "$HOSTAPD_CONF" <<EOF
+wpa=2
+wpa_passphrase=$pass
+wpa_key_mgmt=WPA-PSK
+rsn_pairwise=CCMP
+EOF
+elif [[ "$wifisecurity" == "open" ]]; then
+  echo "[BeaconBox] Open Wi-Fi: no passphrase"
+else
+  echo "[ERROR] Unknown wifi_security: $wifisecurity"
+  exit 1
+fi
+
+echo "[BeaconBox] Applying dnsmasq config"
+
+# dnsmasq
+cat >/etc/dnsmasq.d/beaconbox.conf <<EOF
+interface=$WIFACE
+bind-interfaces
+dhcp-range=10.42.0.50,10.42.0.200,12h
+address=/#/10.42.0.1
+EOF
+
+echo "[BeaconBox] apply-config completed"

@@ -1,0 +1,4 @@
+[submodule "pi-gen"]
+	path = pi-gen
+	url = https://github.com/himuglamuh/pi-gen.git
+	branch = beaconbox-dockerfix

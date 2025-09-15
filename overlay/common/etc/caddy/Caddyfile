@@ -1,0 +1,18 @@
+:80 {
+  # 🍏 Apple triggers captive portal if it can't reach this
+  @appleProbe host captive.apple.com www.apple.com
+  rewrite @appleProbe /index.html
+
+  # 🤖 Android triggers on missing /generate_204
+  @androidProbe path /generate_204 /gen_204
+  rewrite @androidProbe /index.html
+
+  # 🪟 Windows uses this to detect success
+  @msftProbe host msftconnecttest.com www.msftconnecttest.com msftncsi.com www.msftncsi.com
+  rewrite @msftProbe /index.html
+
+  # ✋ Serve everything else normally
+  root * /srv/beaconbox
+  try_files {path} {path}/ /index.html
+  file_server browse
+}

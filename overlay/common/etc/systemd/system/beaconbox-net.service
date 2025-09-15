@@ -1,0 +1,12 @@
+[Unit]
+Description=BeaconBox Network Setup
+After=network.target
+Requires=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/beaconbox-net
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
