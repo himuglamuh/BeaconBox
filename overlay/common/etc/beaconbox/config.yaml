@@ -1,7 +1,8 @@
-ssid: "BeaconBox"
-hidden: false
-passphrase: "beaconbox"
-country: US
-captive: true
-username: "beaconbox"
-password: "beaconbox"
+username: "beaconbox"    # username of the default/only user
+password: "beaconbox"    # please, oh please change this!
+ssid: "BeaconBox"        # wifi network name
+hidden: false            # whether or not to hide the wifi SSID
+wifi_security: open      # options: open (anybody can connect without a password), wpa2 (users must provide the password set in passphrase below)
+passphrase: "beaconbox"  # ignored if wifi_security is open, must not be empty if wifi_security is wpa2
+country: US              # 2-letter ISO country code, e.g. US, DE, FR, GB, etc. Used for wifi channels and power limits.
+enable_ssh: 1            # set to 1 to enable SSH, 0 to disable

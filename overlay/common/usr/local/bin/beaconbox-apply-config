@@ -96,7 +96,7 @@ wpa_passphrase=$pass
 wpa_key_mgmt=WPA-PSK
 rsn_pairwise=CCMP
 EOF
-elif [[ "$wifisecurity" == "none" ]]; then
+elif [[ "$wifisecurity" == "open" ]]; then
   echo "[BeaconBox] Open Wi-Fi: no passphrase"
 else
   echo "[ERROR] Unknown wifi_security: $wifisecurity"
