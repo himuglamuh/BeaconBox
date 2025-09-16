@@ -30,8 +30,10 @@ cd ..
 
 echo "🫱 Grabbing completed image"
 sudo mv pi-gen/deploy/*.img .
-echo "⌛ Build complete. Image:"
-ls -lh *.img
+echo "⌛ Build complete."
+echo "   Image: $(pwd)/$(ls -t *.img | head -1)"
+echo "   Size: $(du -h $(ls -t *.img | head -1) | awk '{print $1}')"
+echo "   SHA256 Hash: $(sha256sum $(ls -t *.img | head -1) | awk '{print $1}')"
 
 echo "🪵 Build logs: "
 echo " - $PI_GEN_DIR/deploy/build.log"

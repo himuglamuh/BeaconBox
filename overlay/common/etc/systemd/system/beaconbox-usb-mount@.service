@@ -1,0 +1,8 @@
+[Unit]
+Description=Mount USB device %i
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/beaconbox-usb-mount.sh /dev/%i
+RemainAfterExit=true
