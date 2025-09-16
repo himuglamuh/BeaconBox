@@ -21,12 +21,38 @@ jobs:
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: 🧰 Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y make git \
-         coreutils quilt parted qemu-user-static debootstrap zerofree zip \
-          dosfstools e2fsprogs libarchive-tools libcap2-bin grep rsync xz-utils \
-          file git curl bc gpg pigz xxd arch-test bmap-tools kmod \
-          binfmt-support kpartx
+      - name: Install pi-gen dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            make \
+            git \
+            coreutils \
+            quilt \
+            parted \
+            qemu-user-static \
+            debootstrap \
+            zerofree \
+            zip \
+            dosfstools \
+            e2fsprogs \
+            libarchive-tools \
+            libcap2-bin \
+            grep \
+            rsync \
+            xz-utils \
+            file \
+            git \
+            curl \
+            bc \
+            gpg \
+            pigz \
+            xxd \
+            arch-test \
+            bmap-tools \
+            kmod \
+            binfmt-support \
+            kpartx
 
       - name: 🛠 Run custom build script
         run: |
