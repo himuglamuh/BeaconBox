@@ -43,9 +43,18 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: "BeaconBox Release - ${{ github.event.inputs.release_date || github.run_started_at }}"
-          tag_name: "release-${{ github.event.inputs.release_date || github.run_started_at }}"
+          tag_name: "release-${{ github.event.inputs.release_date || github.run_id }}"
           files: |
             ${{ steps.find_img.outputs.image }}
             ${{ steps.find_img.outputs.image }}.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🪵 Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build-docker.log
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

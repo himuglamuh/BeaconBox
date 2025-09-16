@@ -25,7 +25,12 @@ cp -r overlay/common pi-gen/common-overlay
 
 echo "⏳ Running pi-gen build (This may take a long time with limited/no output during this phase. Be patient. 🙂)"
 cd pi-gen
-./build-docker.sh > /dev/null 2>&1
+LOGFILE="../build-docker.log"
+./build-docker.sh > "$LOGFILE" 2>&1 || {
+    echo "❌ build-docker.sh failed. Dumping last 100 lines of log:"
+    tail -n 100 "$LOGFILE"
+    exit 1
+}
 cd ..
 
 echo "🫱 Grabbing completed image"
