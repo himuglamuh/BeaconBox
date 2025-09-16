@@ -1,0 +1,10 @@
+[Unit]
+Description=Cleanup stale USB mount dirs on boot
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/beaconbox-usb-cleanup.sh
+
+[Install]
+WantedBy=multi-user.target

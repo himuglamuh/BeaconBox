@@ -1,0 +1,5 @@
+ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd[a-z][0-9]", ENV{ID_FS_TYPE}!="", \
+    ENV{SYSTEMD_WANTS}="beaconbox-usb-mount@%k.service"
+
+ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ENV{ID_FS_TYPE}!="", \
+    ENV{SYSTEMD_WANTS}="beaconbox-usb-mount@%k.service"
