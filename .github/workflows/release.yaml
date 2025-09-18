@@ -26,6 +26,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             make \
+            xz-utils \
             git \
             coreutils \
             quilt \
@@ -65,9 +66,13 @@ jobs:
           IMG=$(ls -t *.img | head -n 1)
           echo "image=$IMG" >> $GITHUB_OUTPUT
 
+      - name: 🗜️ Compress image with xz
+        run: |
+          xz -T0 -z "${{ steps.find_img.outputs.image }}"
+
       - name: 🔐 Generate SHA-256 hash
         run: |
-          sha256sum "${{ steps.find_img.outputs.image }}" > "${{ steps.find_img.outputs.image }}.sha256"
+          sha256sum "${{ steps.find_img.outputs.image }}.xz" > "${{ steps.find_img.outputs.image }}.xz.sha256"
 
       - name: 📦 Upload release
         uses: softprops/action-gh-release@v2
@@ -75,8 +80,8 @@ jobs:
           name: "BeaconBox Release - ${{ github.event.inputs.release_date || github.run_started_at }}"
           tag_name: "release-${{ github.event.inputs.release_date || github.run_id }}"
           files: |
-            ${{ steps.find_img.outputs.image }}
-            ${{ steps.find_img.outputs.image }}.sha256
+            ${{ steps.find_img.outputs.image }}.xz
+            ${{ steps.find_img.outputs.image }}.xz.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
