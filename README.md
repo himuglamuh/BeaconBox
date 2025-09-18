@@ -148,6 +148,107 @@ Drives that were plugged in while BeaconBox was running will persist across rebo
 > [!TIP]
 > After you setup your image to your liking, disable SSH to reduce attack surface, or disable password authentication in favor of key-based auth.
 
+## 📥 Using the Default Image
+
+Want to get up and running fast? Skip the build process and use the latest pre-built BeaconBox image provided in [Releases](https://github.com/himuglamuh/BeaconBox/releases).
+
+This image includes all default configurations and overlays—perfect for quick testing or deployment.
+
+### 🧭 Where to Find It
+
+Head to the [Releases page](https://github.com/himuglamuh/BeaconBox/releases) and download the most recent `.img.xz` file and its corresponding `.sha256` hash file. The filenames follow this format:
+
+```
+YYYY-MM-DD-beaconbox-os.img.xz
+YYYY-MM-DD-beaconbox-os.img.xz.sha256
+```
+
+### ✅ Verifying the Download
+
+To ensure integrity and detect tampering:
+
+```bash
+sha256sum -c YYYY-MM-DD-beaconbox-os.img.xz.sha256
+```
+
+You should see:
+
+```
+YYYY-MM-DD-beaconbox-os.img.xz: OK
+```
+
+If not, **do not proceed.**
+
+### 📦 Decompress the Image
+
+If your flashing tool doesn’t support `.xz` files directly:
+
+```bash
+xz -d YYYY-MM-DD-beaconbox-os.img.xz
+```
+
+This will produce:
+
+```
+YYYY-MM-DD-beaconbox-os.img
+```
+
+### 🔥 Burn the Image to microSD
+
+⚠️ **Double check the device path before proceeding!**
+
+On Linux:
+
+```bash
+lsblk
+# identify your SD card, e.g., /dev/sdX
+
+sudo dd if=YYYY-MM-DD-beaconbox-os.img of=/dev/sdX bs=4M status=progress conv=fsync && sync
+```
+
+Or use a GUI like **Raspberry Pi Imager** or **Balena Etcher**.
+
+### 🔐 Update Default Credentials
+
+The default image sets up a user (defined in [`config.yaml`](./config.yaml)). For security, **you should change the password immediately** after first boot:
+
+```bash
+passwd
+```
+
+You can log in via SSH (on by default):
+
+```bash
+# First, connect to the BeaconBox Wi-Fi network, named "BeaconBox" by default then...
+ssh beaconbox@10.42.0.1
+# use default password "beaconbox", then change it with `passwd`
+```
+
+### 🧾 Customize BeaconBox Content
+
+If you want to add custom files for sharing, place them into the shared directory on the SD card:
+
+```
+/srv/beaconbox/files/
+```
+
+You can add files directly via:
+
+- `scp` from another machine
+- mounting the card on your host machine
+- connecting a USB drive while BeaconBox is running
+
+> [!TIP]
+> Unless you connect a device running BeaconBox to a network using a second network adapter (another Wi-Fi adapter or Ethernet), you won't be able to access the regular internet from the BeaconBox device itself.
+
+Example:
+
+```bash
+scp my_file.pdf beaconbox@10.42.0.1:/srv/beaconbox/files/
+```
+
+Files placed here will be served by the local BeaconBox instance.
+
 ## 🧪 Future Enhancements
 
 - Add build targets for other Raspberry Pi models
